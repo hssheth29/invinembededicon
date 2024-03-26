@@ -1,8 +1,8 @@
 use {
     std::io::Cursor,
     std::sync::mpsc,
-    invinembededicon::TrayItem,
-    invinembededicon::IconSource
+    tray_item::TrayItem,
+    tray_item::IconSource
 };
 
 enum Message {

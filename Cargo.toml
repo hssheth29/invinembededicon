@@ -1,24 +1,10 @@
 [package]
 name = "invinembededicon"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [dependencies]
-ksni = { version = "0.2.0", optional = true }
-libappindicator = { version = "0.9", optional = true } # Tray icon
-gtk = { version = "0.18", optional = true }
-png = "0.17.13"
-
-[features]
-ksni = ["dep:ksni"]
-libappindicator = ["dep:libappindicator", "dep:gtk"]
-
-
-[profile.release]
-strip = true
-opt-level = "z"
-lto = true
-incremental = false
-codegen-units = 1
-panic = "abort"
-
+tray-item = { version = "0.9.0", features = ["ksni"] }
+png = "0.16"
