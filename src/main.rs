@@ -22,17 +22,17 @@ fn main() {
 
     let mut tray = TrayItem::new("Tray Example", icon_red).unwrap();
 
-    tray.add_label("Tray Label").unwrap();
+    tray.add_label("Anubhav Gain").unwrap();
 
     let (tx, rx) = mpsc::sync_channel::<Message>(2);
     let green_tx = tx.clone();
-    tray.add_menu_item("Set icon green", move || {
+    tray.add_menu_item("Change icon to green", move || {
         green_tx.send(Message::Green).unwrap();
     })
     .unwrap();
 
     let red_tx = tx.clone();
-    tray.add_menu_item("Set icon red", move || {
+    tray.add_menu_item("Change icon to red", move || {
         red_tx.send(Message::Red).unwrap();
     })
     .unwrap();
