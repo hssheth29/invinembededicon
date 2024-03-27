@@ -2,42 +2,20 @@ extern crate notify_rust;
 extern crate gtk;
 
 use notify_rust::Notification;
-use std::thread;
-use std::time::Duration;
-
 use tray_item::{IconSource, TrayItem};
 
 fn main() {
-    gtk::init().unwrap();
+    gtk::init().expect("Failed to initialize GTK.");
 
-    let mut tray = TrayItem::new("invinsense", IconSource::Resource("security-high-symbolic")).unwrap();
+    let mut tray = TrayItem::new("invinsense", IconSource::Resource("security-high-symbolic")).expect("Failed to create tray item.");
 
-    tray.add_label("Tray Label").unwrap();
+    tray.add_label("Tray Label").expect("Failed to add tray label.");
 
     tray.add_menu_item("Hello", || {
-        println!("Hello!");
-    }).unwrap();
-
-    tray.add_menu_item("Quit", || {
-        gtk::main_quit();
-    }).unwrap();
-
-    // Spawn a thread to send notifications
-    thread::spawn(|| {
-        send_notifications();
-    });
+        send_notification("Hello from Rust!");
+    }).expect("Failed to add menu item.");
 
     gtk::main();
-}
-
-fn send_notifications() {
-    loop {
-        // Send notification
-        send_notification("Hello from Rust!");
-
-        // Sleep for one second
-        thread::sleep(Duration::from_secs(1));
-    }
 }
 
 fn send_notification(message: &str) {
