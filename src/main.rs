@@ -7,9 +7,9 @@ use tray_item::{IconSource, TrayItem};
 fn main() {
     gtk::init().expect("Failed to initialize GTK.");
 
-    let mut tray = TrayItem::new("invinsense", IconSource::Resource("security-high-symbolic")).expect("Failed to create tray item.");
+    let mut tray = TrayItem::new("invinembededicon", IconSource::Resource("security-high-symbolic")).expect("Failed to create tray item.");
 
-    tray.add_label("Tray Label").expect("Failed to add tray label.");
+    tray.add_label("invinembededicon").expect("Failed to add tray label.");
 
     tray.add_menu_item("Hello", || {
         send_notification("Hello from Rust!");
