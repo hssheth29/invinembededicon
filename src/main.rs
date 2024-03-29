@@ -17,11 +17,11 @@ fn main() {
         }
     };
 
-    // Define hardcoded menu items without status emojis
+    // Define hardcoded menu items
     let menu_items = vec![
         ("User Behavior Analytics", "osquery is installed and halted.", 1),
         ("Endpoint Detection and Response", "Wazuh is not installed and halted.", 0),
-        ("End-Point Protection", "ClamAV is installed and stopped.", 2), // Assuming you want to demonstrate the use of all three statuses
+        ("End-Point Protection", "ClamAV is installed and stopped.", 2),
     ];
 
     for (text, description, status) in menu_items.iter() {
@@ -36,9 +36,10 @@ fn main() {
         let menu_text = format!("{} {} - Status: {}", emoji, text, status);
         let text_clone = text.to_string();
         let description_clone = description.to_string();
+        let status_clone = *status;
 
         if tray.add_menu_item(&menu_text, move || {
-            send_notification(&text_clone, &description_clone);
+            send_notification(&text_clone, &description_clone, status_clone);
         }).is_err() {
             eprintln!("Failed to add dynamic menu item.");
         }
@@ -47,11 +48,19 @@ fn main() {
     gtk::main();
 }
 
-fn send_notification(title: &str, message: &str) {
+fn send_notification(title: &str, message: &str, status: i32) {
+    // Determine the icon based on the status code
+    let icon_name = match status {
+        0 => "security-low-symbolic",
+        1 => "dialog-error-symbolic",
+        2 => "dialog-warning-symbolic",
+        _ => "dialog-information", // Fallback icon
+    };
+
     let notification = Notification::new()
         .summary(title)
         .body(message)
-        .icon("security-high-symbolic")
+        .icon(icon_name)
         .finalize();
 
     if notification.show().is_err() {
