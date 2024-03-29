@@ -21,7 +21,7 @@ fn main() {
     let menu_items = vec![
         ("🟢   User Behavior Analytics", "osquery is installed and halted.", 1),
         ("🔴   Endpoint Detection and Response", "Wazuh is not installed and halted.", 0),
-        ("🔴   End-Point Protection", "ClamAV is installed and stopped.", 0),
+        ("🟠   End-Point Protection", "ClamAV is installed and stopped.", 0),
     ];
 
     for (text, description, status) in menu_items.iter() {
