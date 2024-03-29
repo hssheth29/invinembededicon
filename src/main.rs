@@ -17,15 +17,23 @@ fn main() {
         }
     };
 
-    // Hardcoded menu items with unicode symbols
+    // Define hardcoded menu items without status emojis
     let menu_items = vec![
-        ("🟢   User Behavior Analytics", "osquery is installed and halted.", 1),
-        ("🔴   Endpoint Detection and Response", "Wazuh is not installed and halted.", 0),
-        ("🟠   End-Point Protection", "ClamAV is installed and stopped.", 0),
+        ("User Behavior Analytics", "osquery is installed and halted.", 1),
+        ("Endpoint Detection and Response", "Wazuh is not installed and halted.", 0),
+        ("End-Point Protection", "ClamAV is installed and stopped.", 2), // Assuming you want to demonstrate the use of all three statuses
     ];
 
     for (text, description, status) in menu_items.iter() {
-        let menu_text = format!("{} - Status: {}", text, status);
+        // Determine the emoji based on the status code
+        let emoji = match status {
+            0 => "🟢", // Green for operational
+            1 => "🔴", // Red for error
+            2 => "🟠", // Orange for warning or attention
+            _ => "⚪", // Fallback to white if an unexpected status code is encountered
+        };
+
+        let menu_text = format!("{} {} - Status: {}", emoji, text, status);
         let text_clone = text.to_string();
         let description_clone = description.to_string();
 
@@ -43,7 +51,7 @@ fn send_notification(title: &str, message: &str) {
     let notification = Notification::new()
         .summary(title)
         .body(message)
-        .icon("dialog-information")
+        .icon("security-high-symbolic")
         .finalize();
 
     if notification.show().is_err() {
