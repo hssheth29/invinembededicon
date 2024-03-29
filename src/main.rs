@@ -21,7 +21,7 @@ fn main() {
     // Define hardcoded menu items with service names, technical names, and status codes
     let menu_items = vec![
         ("User Behavior Analytics", "osquery", 1),
-        ("Endpoint Detection and Response", "Wazuh", 1),
+        ("Endpoint Detection and Response", "Wazuh", 0),
         ("End-Point Protection", "ClamAV", 2),
     ];
 
@@ -29,7 +29,7 @@ fn main() {
         let emoji = match status {
             0 => "🟢", // Green for operational
             1 => "🔴", // Red for error
-            2 => "🟠", // Orange for warning or attention
+            2 => "🟡", // Orange for warning or attention
             _ => "⚪", // Fallback to white
         };
 
