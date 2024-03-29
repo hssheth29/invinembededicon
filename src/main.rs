@@ -1,5 +1,6 @@
 extern crate notify_rust;
 extern crate gtk;
+
 use notify_rust::Notification;
 use tray_item::{IconSource, TrayItem};
 
@@ -17,29 +18,28 @@ fn main() {
         }
     };
 
-    // Define hardcoded menu items with service names and status codes
+    // Define hardcoded menu items with service names, technical names, and status codes
     let menu_items = vec![
-        ("osquery", 0),
-        ("Wazuh", 2),
-        ("ClamAV", 1),
+        ("User Behavior Analytics", "osquery", 1),
+        ("Endpoint Detection and Response", "Wazuh", 1),
+        ("End-Point Protection", "ClamAV", 2),
     ];
 
-    for (service_name, status) in menu_items.iter() {
-        // Determine the emoji based on the status code
+    for (user_friendly_name, technical_name, status) in menu_items.iter() {
         let emoji = match status {
             0 => "🟢", // Green for operational
             1 => "🔴", // Red for error
             2 => "🟠", // Orange for warning or attention
-            _ => "⚪", // Fallback to white if an unexpected status code is encountered
+            _ => "⚪", // Fallback to white
         };
 
-        // Create menu text without the description, only the service name and status code
-        let menu_text = format!("{} {} - Status: {}", emoji, service_name, status);
-        let service_name_clone = service_name.to_string();
+        let menu_text = format!("{} {}", emoji, user_friendly_name);
+        let user_friendly_name_clone = user_friendly_name.to_string();
+        let technical_name_clone = technical_name.to_string();
         let status_clone = *status;
 
         if tray.add_menu_item(&menu_text, move || {
-            send_dynamic_notification(&service_name_clone, status_clone);
+            send_dynamic_notification(&user_friendly_name_clone, &technical_name_clone, status_clone);
         }).is_err() {
             eprintln!("Failed to add dynamic menu item.");
         }
@@ -48,16 +48,14 @@ fn main() {
     gtk::main();
 }
 
-fn send_dynamic_notification(service_name: &str, status: i32) {
-    // Determine the message based on the status code
+fn send_dynamic_notification(user_friendly_name: &str, technical_name: &str, status: i32) {
     let message = match status {
-        0 => format!("{} is healthy.", service_name),
-        1 => format!("{} is not installed.", service_name),
-        2 => format!("{} is installed but not running.", service_name),
-        _ => format!("{} status is unknown.", service_name), // Fallback message
+        0 => format!("{} is healthy.", technical_name),
+        1 => format!("{} is not installed.", technical_name),
+        2 => format!("{} is installed but not running.", technical_name),
+        _ => format!("{} status is unknown.", technical_name), // Fallback message
     };
 
-    // Determine the icon based on the status code
     let icon_name = match status {
         0 => "security-low-symbolic",
         1 => "dialog-error-symbolic",
@@ -66,7 +64,7 @@ fn send_dynamic_notification(service_name: &str, status: i32) {
     };
 
     let notification = Notification::new()
-        .summary(service_name)
+        .summary(user_friendly_name)
         .body(&message)
         .icon(icon_name)
         .finalize();
