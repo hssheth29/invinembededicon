@@ -9,3 +9,6 @@ edition = "2021"
 tray-item = { version = "0.9.0", features = ["ksni"] }
 notify-rust = "4.10.0"
 gtk = "0.18.1"
+serde = "1.0.197"
+serde_json = "1.0.115"
+serde_derive = "1.0.197"

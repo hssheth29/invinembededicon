@@ -1,33 +1,52 @@
 extern crate notify_rust;
 extern crate gtk;
-
 use notify_rust::Notification;
 use tray_item::{IconSource, TrayItem};
 
 fn main() {
-    gtk::init().expect("Failed to initialize GTK.");
+    if gtk::init().is_err() {
+        eprintln!("Failed to initialize GTK.");
+        return;
+    }
 
-    let mut tray = TrayItem::new("invinembededicon", IconSource::Resource("security-high-symbolic")).expect("Failed to create tray item.");
+    let mut tray = match TrayItem::new("invinembededicon", IconSource::Resource("security-high-symbolic")) {
+        Ok(tray) => tray,
+        Err(e) => {
+            eprintln!("Failed to create tray item: {:?}", e);
+            return;
+        }
+    };
 
-    tray.add_label("invinembededicon").expect("Failed to add tray label.");
+    // Hardcoded menu items
+    let menu_items = vec![
+        ("User Behavior Analytics", "osquery is installed and halted.", 0),
+        ("Endpoint Detection and Response", "Wazuh is not installed and halted.", 0),
+        ("End-Point Protection", "ClamAV is installed and stopped.", 0),
+    ];
 
-    tray.add_menu_item("Hello", || {
-        send_notification("Hello from Rust!");
-    }).expect("Failed to add menu item.");
+    for (text, description, status) in menu_items.iter() {
+        let menu_text = format!("{} - Status: {}", text, status);
+        let text_clone = text.to_string();
+        let description_clone = description.to_string();
+
+        if tray.add_menu_item(&menu_text, move || {
+            send_notification(&text_clone, &description_clone);
+        }).is_err() {
+            eprintln!("Failed to add dynamic menu item.");
+        }
+    }
 
     gtk::main();
 }
 
-fn send_notification(message: &str) {
-    // Create a new notification
+fn send_notification(title: &str, message: &str) {
     let notification = Notification::new()
-        .summary("Rust Notification")
+        .summary(title)
         .body(message)
         .icon("dialog-information")
-        .finalize(); // Use finalize to construct the Notification object
+        .finalize();
 
-    // Check if the notification is supported
-    if let Err(error) = notification.show() {
-        eprintln!("Error showing notification: {:?}", error);
+    if notification.show().is_err() {
+        eprintln!("Error showing notification.");
     }
 }
