@@ -3,6 +3,7 @@ extern crate gtk;
 
 use notify_rust::Notification;
 use tray_item::{IconSource, TrayItem};
+use std::{thread, time};
 
 fn main() {
     if gtk::init().is_err() {
@@ -25,12 +26,12 @@ fn main() {
         ("End-Point Protection", "ClamAV", 2),
     ];
 
-    for (user_friendly_name, technical_name, status) in menu_items.iter() {
+    for (user_friendly_name, technical_name, status) in &menu_items {
         let emoji = match status {
-            0 => "🟢", // Green for operational
-            1 => "🔴", // Red for error
-            2 => "🟡", // Orange for warning or attention
-            _ => "⚪", // Fallback to white
+            0 => "🟢  ", // Green for operational
+            1 => "🔴  ", // Red for error
+            2 => "🟡  ", // Orange for warning or attention
+            _ => "⚪  ", // Fallback to white
         };
 
         let menu_text = format!("{} {}", emoji, user_friendly_name);
@@ -39,28 +40,52 @@ fn main() {
         let status_clone = *status;
 
         if tray.add_menu_item(&menu_text, move || {
-            send_dynamic_notification(&user_friendly_name_clone, &technical_name_clone, status_clone);
+            send_notification(&user_friendly_name_clone, &technical_name_clone, status_clone);
         }).is_err() {
             eprintln!("Failed to add dynamic menu item.");
         }
     }
 
+    // Start the notification thread
+    let notification_interval = time::Duration::from_secs(10); // Check every 10 seconds
+    let cloned_menu_items = menu_items.clone();
+    thread::spawn(move || {
+        let mut last_notification_times = vec![time::Instant::now(); cloned_menu_items.len()];
+
+        loop {
+            for (index, (user_friendly_name, technical_name, status)) in cloned_menu_items.iter().enumerate() {
+                let interval = match status {
+                    1 => time::Duration::from_secs(60),
+                    2 => time::Duration::from_secs(100),
+                    _ => continue, // No automatic notification for status 0
+                };
+
+                // Check if enough time has elapsed since the last notification
+                if last_notification_times[index].elapsed() >= interval {
+                    send_notification(user_friendly_name, technical_name, *status);
+                    last_notification_times[index] = time::Instant::now();
+                }
+            }
+            thread::sleep(notification_interval);
+        }
+    });
+
     gtk::main();
 }
 
-fn send_dynamic_notification(user_friendly_name: &str, technical_name: &str, status: i32) {
+fn send_notification(user_friendly_name: &str, technical_name: &str, status: i32) {
     let message = match status {
         0 => format!("{} is healthy.", technical_name),
         1 => format!("{} is not installed.", technical_name),
         2 => format!("{} is installed but not running.", technical_name),
-        _ => format!("{} status is unknown.", technical_name), // Fallback message
+        _ => format!("{} status is unknown.", technical_name),
     };
 
     let icon_name = match status {
         0 => "security-low-symbolic",
         1 => "dialog-error-symbolic",
         2 => "dialog-warning-symbolic",
-        _ => "dialog-information", // Fallback icon
+        _ => "dialog-information",
     };
 
     let notification = Notification::new()
